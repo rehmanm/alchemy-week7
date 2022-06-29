@@ -34,7 +34,54 @@ const sampleData = [
         "address":"0xe81Bf5A757C4f7F82a2F23b1e59bE45c33c5b13",
     },
 ];
-const [data, updateData] = useState(sampleData);
+const [data, updateData] = useState([sampleData]);
+const [dataFetched, updatedataFetched] = useState(false)
+
+async function getAllNFTs(){
+    const ethers = require("ethers");
+ 
+    try{
+ 
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner(); 
+        console.log("contract")
+        let contract = new ethers.Contract(MarketplaceJSON.address, MarketplaceJSON.abi, signer);
+
+        console.log("contract", contract)
+        let transaction = await contract.getAllNfts();
+        console.log("transation called", transaction)
+        const items = await Promise.all(transaction.map(async i => {
+            const tokenURI = await contract.tokenURI(i.tokenId);
+
+            let meta = await axios.get(tokenURI);
+
+            meta = meta.data;
+
+            console.log("meta", meta)
+
+            let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
+            return {
+                price,
+                tokenId: i.tokenId.toNumber(),
+                seller: i.seller,
+                owner: i.owner,
+                image: meta.image,
+                name: meta.name,
+                description: meta.description
+            }
+        }));
+
+        updatedataFetched(true);
+        updateData(items);
+
+    } catch(error) {
+        console.log(error)
+    }
+}
+ 
+if (!dataFetched) {
+    getAllNFTs()
+}
 
 return (
     <div>

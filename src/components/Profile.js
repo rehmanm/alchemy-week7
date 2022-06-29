@@ -9,6 +9,54 @@ export default function Profile () {
     const [data, updateData] = useState([]);
     const [address, updateAddress] = useState("0x");
     const [totalPrice, updateTotalPrice] = useState("0");
+    const [dataFetched, updatedataFetched] = useState(false)
+
+    async function getAllNFTs(){
+        const ethers = require("ethers");
+        let sumPrice = 0;
+        try{
+     
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner(); 
+            const addr = await signer.getAddress();
+            let contract = new ethers.Contract(MarketplaceJSON.address, MarketplaceJSON.abi, signer); 
+            let transaction = await contract.getMyNfts(); 
+            const items = await Promise.all(transaction.map(async i => {
+                const tokenURI = await contract.tokenURI(i.tokenId);
+    
+                let meta = await axios.get(tokenURI);
+    
+                meta = meta.data;
+    
+                console.log("meta", meta)
+    
+                let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
+                sumPrice += Number(price);
+                return {
+                    price,
+                    tokenId: i.tokenId.toNumber(),
+                    seller: i.seller,
+                    owner: i.owner,
+                    image: meta.image,
+                    name: meta.name,
+                    description: meta.description
+                }
+            }));
+    
+            updatedataFetched(true);
+            updateData(items);
+            updateAddress(addr);
+            updateTotalPrice(sumPrice.toPrecision(3));
+    
+        } catch(error) {
+            console.log(error)
+        }
+    }
+     
+    if (!dataFetched) {
+        getAllNFTs()
+    }
     
     return (
         <div className="profileClass" style={{"min-height":"100vh"}}>
