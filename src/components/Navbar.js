@@ -1,12 +1,7 @@
-import logo from '../logo_3.png';
+ 
 import fullLogo from '../full_logo.png';
 import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useRouteMatch,
-  useParams
+  Link, 
 } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
@@ -64,7 +59,7 @@ useEffect(() => {
     updateButton();
   }
 
-  window.ethereum.on('accountsChanged', function(accounts){
+  window.ethereum.on('accountsChanged', function(_accounts){
     window.location.replace(location.pathname)
   })
 });
