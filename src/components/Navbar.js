@@ -62,7 +62,7 @@ useEffect(() => {
   window.ethereum.on('accountsChanged', function(_accounts){
     window.location.replace(location.pathname)
   })
-});
+}, [connected, location.pathname]);
 
 
     return (
